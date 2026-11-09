@@ -1,43 +1,40 @@
+const KEY='mio-bilancio-v2';
+const months=[['2026-06','Giugno 2026'],['2026-07','Luglio 2026'],['2026-08','Agosto 2026'],['2026-09','Settembre 2026'],['2026-10','Ottobre 2026'],['2026-11','Novembre 2026']];
+const cats={income:['Stipendio','Lavoro extra','Rimborsi','Altre entrate'],expense:['Casa e bollette','Spesa e alimentari','Trasporti e carburante','Salute','Telefono e internet','Tempo libero','Acquisti','Lavoro','Altro']};
+let data=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"goal":0}');
+let type='expense';
 const $=id=>document.getElementById(id);
-const KEY='mioBilancio.v1';
-const categories={
-  expense:[['Casa','🏠'],['Spesa alimentare','🛒'],['Trasporti e carburante','⛽'],['Bollette','💡'],['Salute','💊'],['Ristoranti e bar','🍽️'],['Shopping','🛍️'],['Svago','🎬'],['Abbonamenti','📱'],['Auto','🚗'],['Altro','📦']],
-  income:[['Stipendio','💼'],['Lavoro extra','🧰'],['Rimborsi','↩️'],['Regali','🎁'],['Altro','💶']]
-};
-let state=load();
-function load(){try{return Object.assign({transactions:[],goal:0,budget:0,opening:0},JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return {transactions:[],goal:0,budget:0,opening:0}}}
-function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
-function euro(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n)||0)}
-function dateNow(){return new Date().toISOString().slice(0,10)}
-function monthKey(d=dateNow()){return d.slice(0,7)}
-function current(){return state.transactions.filter(t=>t.date.startsWith(monthKey()))}
-function totals(list){return list.reduce((a,t)=>{a[t.type]+=Number(t.amount);return a},{income:0,expense:0})}
-function balance(){return state.opening+state.transactions.reduce((s,t)=>s+(t.type==='income'?1:-1)*Number(t.amount),0)}
-function catIcon(type,cat){return (categories[type].find(c=>c[0]===cat)||['Altro','📦'])[1]}
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(id==='moves')renderMoves();if(id==='stats')renderStats();if(id==='goals')renderGoals();if(id==='settings')$('openingBalance').value=state.opening}
-document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
-function txHtml(t){return `<div class="row" style="padding:10px 0;border-bottom:1px solid #263947" onclick="editTx('${t.id}')"><div class="category"><div class="caticon">${catIcon(t.type,t.category)}</div><div style="min-width:0"><div class="txname">${esc(t.note||t.category)}</div><div class="txmeta">${esc(t.category)} · ${new Date(t.date+'T12:00:00').toLocaleDateString('it-IT')}</div></div></div><div class="amount ${t.type==='income'?'positive':'negative'}">${t.type==='income'?'+':'−'}${euro(t.amount)}</div></div>`}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function render(){const ts=current(),t=totals(ts);$('balance').textContent=euro(balance());$('income').textContent='+'+euro(t.income);$('expense').textContent='−'+euro(t.expense);$('recent').innerHTML=state.transactions.length?[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(txHtml).join(''):'<div class="empty">Ancora nessun movimento.<br>Aggiungi la prima entrata o uscita.</div>';renderGoalCard();renderMoves();renderStats();renderGoals();populateMonths()}
-function renderGoalCard(){let t=totals(current()),saved=t.income-t.expense,goal=Number(state.goal)||0,p=goal?Math.max(0,Math.min(100,saved/goal*100)):0;$('goalCard').innerHTML=goal?`<div class="row"><span class="muted small">Obiettivo di risparmio mensile</span><strong>${euro(goal)}</strong></div><div class="progress"><i style="width:${p}%"></i></div><div class="row small"><span class="muted">Risparmio netto: ${euro(saved)}</span><span>${Math.round(p)}% raggiunto</span></div>`:'<div class="empty">Imposta un obiettivo e un budget dalla sezione Risparmio.</div>'}
-function populateMonths(){let sel=$('filterMonth'),old=sel.value;let months=[...new Set([monthKey(),...state.transactions.map(t=>t.date.slice(0,7))])].sort().reverse();sel.innerHTML=months.map(m=>`<option value="${m}">${new Date(m+'-02').toLocaleDateString('it-IT',{month:'long',year:'numeric'})}</option>`).join('');if(months.includes(old))sel.value=old}
-function renderMoves(){if(!$('allMoves'))return;let type=$('filterType').value||'all',m=$('filterMonth').value||monthKey();let arr=[...state.transactions].filter(t=>t.date.startsWith(m)&&(type==='all'||t.type===type)).sort((a,b)=>b.date.localeCompare(a.date));$('allMoves').innerHTML=arr.length?arr.map(txHtml).join(''):'<div class="empty">Nessun movimento in questo periodo.</div>'}
-$('filterType').addEventListener('change',renderMoves);$('filterMonth').addEventListener('change',renderMoves);
-function renderStats(){let ts=current(),t=totals(ts),net=t.income-t.expense;$('statsMonth').textContent=new Date().toLocaleDateString('it-IT',{month:'long',year:'numeric'});$('net').textContent=euro(net);$('net').className=net>=0?'positive':'negative';$('statIn').textContent=euro(t.income);$('statOut').textContent=euro(t.expense);let sums={};ts.filter(x=>x.type==='expense').forEach(x=>sums[x.category]=(sums[x.category]||0)+Number(x.amount));let arr=Object.entries(sums).sort((a,b)=>b[1]-a[1]);let max=arr[0]?.[1]||1;$('categoryBars').innerHTML=arr.length?arr.map(([c,v])=>`<div class="barrow"><span>${esc(c)}</span><div class="barbg"><div class="barfill" style="width:${v/max*100}%"></div></div><strong style="text-align:right">${euro(v)}</strong></div>`).join(''):'<div class="empty">Aggiungi uscite per vedere le categorie.</div>'}
-function renderGoals(){if(!$('goalAmount'))return;$('goalAmount').value=state.goal||'';$('budgetAmount').value=state.budget||'';let t=totals(current()),goal=Number(state.goal)||0,budget=Number(state.budget)||0;let savings=t.income-t.expense;$('goalProgress').innerHTML=goal?`<div class="row"><span class="muted small">Risparmio netto del mese</span><strong class="${savings>=0?'positive':'negative'}">${euro(savings)}</strong></div><div class="progress"><i style="width:${Math.max(0,Math.min(100,savings/goal*100))}%"></i></div><span class="muted small">${Math.max(0,Math.round(savings/goal*100))}% dell'obiettivo raggiunto</span>`:'<p class="muted small">Nessun obiettivo impostato.</p>';$('budgetProgress').innerHTML=budget?`<div class="row"><span class="muted small">Speso questo mese</span><strong>${euro(t.expense)} / ${euro(budget)}</strong></div><div class="progress"><i style="width:${Math.min(100,t.expense/budget*100)}%;background:${t.expense>budget?'var(--red)':'var(--blue)'}"></i></div><span class="muted small">${t.expense>budget?'Hai superato il budget.':'Ti restano '+euro(budget-t.expense)}</span>`:'<p class="muted small">Nessun budget impostato.</p>'}
-function fillCats(type,selected){$('txCategory').innerHTML=categories[type].map(c=>`<option ${c[0]===selected?'selected':''}>${c[0]}</option>`).join('')}
-$('txType').addEventListener('change',()=>fillCats($('txType').value));
-function openForm(type='expense'){ $('txForm').reset();$('txId').value='';$('txType').value=type;fillCats(type);$('txDate').value=dateNow();$('formTitle').textContent='Nuovo movimento';$('deleteTx').style.display='none';$('txDialog').showModal()}
-function editTx(id){let t=state.transactions.find(x=>x.id===id);if(!t)return;$('txId').value=t.id;$('txType').value=t.type;fillCats(t.type,t.category);$('txAmount').value=t.amount;$('txNote').value=t.note;$('txDate').value=t.date;$('formTitle').textContent='Modifica movimento';$('deleteTx').style.display='block';$('txDialog').showModal()}
-window.openForm=openForm;window.editTx=editTx;window.showPage=showPage;
-$('txForm').addEventListener('submit',e=>{e.preventDefault();let amount=Number($('txAmount').value);if(!Number.isFinite(amount)||amount<=0)return;let obj={id:$('txId').value||crypto.randomUUID(),type:$('txType').value,amount,category:$('txCategory').value,note:$('txNote').value.trim(),date:$('txDate').value};let i=state.transactions.findIndex(x=>x.id===obj.id);if(i>=0)state.transactions[i]=obj;else state.transactions.push(obj);$('txDialog').close();save()});
-$('deleteTx').addEventListener('click',()=>{let id=$('txId').value;if(confirm('Eliminare questo movimento?')){state.transactions=state.transactions.filter(t=>t.id!==id);$('txDialog').close();save()}});
-$('saveGoal').addEventListener('click',()=>{state.goal=Math.max(0,Number($('goalAmount').value)||0);save();alert('Obiettivo salvato.')});
-$('saveBudget').addEventListener('click',()=>{state.budget=Math.max(0,Number($('budgetAmount').value)||0);save();alert('Budget salvato.')});
-$('saveOpening').addEventListener('click',()=>{state.opening=Number($('openingBalance').value)||0;save();alert('Saldo iniziale salvato.')});
-function exportData(){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mio-bilancio-backup-'+dateNow()+'.json';a.click();URL.revokeObjectURL(a.href)}
-$('exportBtn').addEventListener('click',exportData);$('backupBtn').addEventListener('click',exportData);
-$('importFile').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.transactions))throw Error();if(confirm('Importare il backup? I dati attuali saranno sostituiti.')){state={transactions:d.transactions,goal:Number(d.goal)||0,budget:Number(d.budget)||0,opening:Number(d.opening)||0};save();alert('Backup importato.')}}catch{alert('File di backup non valido.')}e.target.value=''});
-$('clearBtn').addEventListener('click',()=>{if(confirm('Vuoi cancellare definitivamente tutti i dati salvati in questo browser? Prima esporta un backup, se necessario.')){localStorage.removeItem(KEY);state=load();save()}});
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
-render();
+const euro=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(n||0);
+const monthOf=d=>d.slice(0,7);
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function setup(){ $('monthSelect').innerHTML=months.map(([v,n])=>`<option value="${v}">${n}</option>`).join('');$('monthSelect').value='2026-11';$('date').value='2026-11-09';$('date').max='2026-11-30';$('date').min='2026-06-01';$('goal').value=data.goal||'';setType('expense');}
+function setType(t){type=t;$('incomeTab').className=t==='income'?'income':'ghost';$('expenseTab').className=t==='expense'?'expense':'ghost';$('category').innerHTML=cats[t].map(c=>`<option>${c}</option>`).join('')}
+function totals(list){return list.reduce((a,x)=>{a[x.type]+=x.amount;return a},{income:0,expense:0})}
+function render(){
+ const m=$('monthSelect').value, list=data.transactions.filter(x=>monthOf(x.date)===m).sort((a,b)=>b.date.localeCompare(a.date));
+ const t=totals(list),bal=t.income-t.expense;
+ $('incomeTotal').textContent=euro(t.income);$('expenseTotal').textContent=euro(t.expense);$('balanceTotal').textContent=euro(bal);$('balanceTotal').className=bal>=0?'positive':'negative';
+ $('transactionList').innerHTML=list.length?list.map(x=>`<div class="item"><div style="min-width:0"><div class="desc">${escapeHtml(x.description)}</div><div class="meta">${x.date} · ${escapeHtml(x.category)}</div></div><div class="actions"><span class="amount ${x.type==='income'?'positive':'negative'}">${x.type==='income'?'+':'−'}${euro(x.amount)}</span><button class="delete" data-delete="${x.id}" aria-label="Elimina movimento">✕</button></div></div>`).join(''):'<div class="empty">Nessun movimento per questo mese. Aggiungi la prima entrata o uscita qui sopra.</div>';
+ renderMonths();renderCategories(list);renderGoal(bal);
+}
+function renderMonths(){
+ const rows=months.map(([m,n])=>{let t=totals(data.transactions.filter(x=>monthOf(x.date)===m));return {m,n,...t,bal:t.income-t.expense}});
+ const max=Math.max(1,...rows.flatMap(x=>[x.income,x.expense]));
+ $('monthChart').innerHTML=rows.map(x=>`<div style="margin:12px 0"><div class="barrow"><strong>${x.n.split(' ')[0]}</strong><div><div class="track"><div class="bar in" style="width:${x.income/max*100}%"></div></div><div class="track" style="margin-top:5px"><div class="bar out" style="width:${x.expense/max*100}%"></div></div></div><span style="text-align:right">${euro(x.bal)}</span></div><div class="small" style="margin-left:82px">Entrate ${euro(x.income)} · Uscite ${euro(x.expense)}</div></div>`).join('');
+}
+function renderCategories(list){
+ const sums={};list.filter(x=>x.type==='expense').forEach(x=>sums[x.category]=(sums[x.category]||0)+x.amount);
+ const entries=Object.entries(sums).sort((a,b)=>b[1]-a[1]),max=Math.max(1,...entries.map(x=>x[1]));
+ $('categoryChart').innerHTML=entries.length?entries.map(([c,v])=>`<div class="barrow"><span>${escapeHtml(c)}</span><div class="track"><div class="bar out" style="width:${v/max*100}%"></div></div><strong style="text-align:right">${euro(v)}</strong></div>`).join(''):'<div class="empty">Le categorie delle uscite compariranno qui.</div>';
+}
+function renderGoal(balance){let goal=Number(data.goal)||0;$('goalStatus').textContent=goal?`Saldo del mese: ${euro(balance)} · Obiettivo: ${euro(goal)} · ${balance>=goal?'Obiettivo raggiunto! 🎉':`Ti mancano ${euro(Math.max(0,goal-balance))} per raggiungerlo.`}`:'Imposta un obiettivo per vedere i tuoi progressi.'}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('incomeTab').onclick=()=>setType('income');$('expenseTab').onclick=()=>setType('expense');$('monthSelect').onchange=render;
+$('transactionForm').onsubmit=e=>{e.preventDefault();let amount=Number($('amount').value),date=$('date').value;if(!(amount>0)||!date)return;data.transactions.push({id:Date.now().toString()+Math.random().toString(16).slice(2),type,amount, date,description:$('description').value.trim(),category:$('category').value});save();$('amount').value='';$('description').value='';$('monthSelect').value=monthOf(date)};
+$('transactionList').onclick=e=>{let b=e.target.closest('[data-delete]');if(b&&confirm('Vuoi eliminare questo movimento?')){data.transactions=data.transactions.filter(x=>x.id!==b.dataset.delete);save()}};
+$('goal').onchange=()=>{data.goal=Math.max(0,Number($('goal').value)||0);save()};
+$('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mio-bilancio-backup.json';a.click();URL.revokeObjectURL(a.href)};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.transactions))throw Error();if(confirm('Importare il backup? I dati attuali saranno sostituiti.')){data={transactions:d.transactions,goal:Number(d.goal)||0};save();$('goal').value=data.goal}}catch{alert('File di backup non valido.')}e.target.value=''};
+setup();render();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

@@ -1,98 +1,77 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101923">
-  <meta name="description" content="Mio Bilancio: gestisci entrate, uscite e risparmi.">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <title>Mio Bilancio</title>
-  <style>
-    :root{color-scheme:dark;--bg:#0c141d;--panel:#142331;--panel2:#1a2c3b;--line:#294052;--text:#edf4f7;--muted:#9db0bd;--green:#55d69a;--red:#ff8585;--blue:#80baff;--gold:#f2c66d;--radius:19px}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172b3b 0,#0c141d 55%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;padding-bottom:90px}
-    button,input,select{font:inherit}button{cursor:pointer}.wrap{max-width:760px;margin:auto;padding:18px 16px 30px}
-    header{display:flex;justify-content:space-between;align-items:center;margin:8px 0 22px}.brand{display:flex;align-items:center;gap:11px}.logo{width:43px;height:43px;border-radius:14px;background:linear-gradient(145deg,#2e9d76,#1d654f);display:grid;place-items:center;font-size:22px;box-shadow:0 8px 24px #1b9a6840}.brand h1{font-size:19px;margin:0}.brand small{color:var(--muted)}
-    .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:13px;padding:10px}
-    .hero{background:linear-gradient(135deg,#173d38,#173044 70%,#1b2d42);border:1px solid #326052;border-radius:24px;padding:20px;margin-bottom:14px;box-shadow:0 15px 35px #0003}
-    .eyebrow{color:#b8d8ce;font-size:12px;text-transform:uppercase;letter-spacing:.09em}.balance{font-size:clamp(32px,8vw,43px);font-weight:750;letter-spacing:-1.5px;margin:6px 0 17px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#0d1c2680;border:1px solid #ffffff16;border-radius:15px;padding:12px}.metric span{display:block;color:#bfd0d6;font-size:12px}.metric strong{font-size:19px;display:block;margin-top:4px}.positive{color:var(--green)}.negative{color:var(--red)}
-    .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 20px}.quick button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:14px;border-radius:16px;font-weight:650}.quick button:first-child{border-color:#28684e;background:#153329}.quick button:last-child{border-color:#704747;background:#332122}
-    .sectionhead{display:flex;justify-content:space-between;align-items:center;margin:20px 2px 11px}.sectionhead h2{font-size:17px;margin:0}.muted{color:var(--muted)}.small{font-size:12px}
-    .card{background:linear-gradient(145deg,#152533,#12202c);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:13px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.category{display:flex;align-items:center;gap:11px;min-width:0}.caticon{width:40px;height:40px;flex:none;border-radius:13px;background:var(--panel2);display:grid;place-items:center;font-size:19px}.txname{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.txmeta{font-size:12px;color:var(--muted);margin-top:3px}.amount{font-weight:750;white-space:nowrap}.empty{text-align:center;padding:25px 10px;color:var(--muted)}
-    .progress{height:9px;border-radius:20px;background:#263947;overflow:hidden;margin:11px 0 6px}.progress>i{display:block;height:100%;background:linear-gradient(90deg,#42b982,#83dfae);border-radius:20px}
-    .barrow{display:grid;grid-template-columns:90px 1fr 72px;align-items:center;gap:8px;margin:12px 0;font-size:12px}.barbg{height:9px;background:#263947;border-radius:20px;overflow:hidden}.barfill{height:100%;background:#6caeea;border-radius:20px}
-    .tabs{position:fixed;bottom:0;left:0;right:0;background:#0e1923f2;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;padding:8px 8px max(8px,env(safe-area-inset-bottom));z-index:5}.tabs button{flex:1;max-width:180px;background:none;border:0;color:var(--muted);padding:8px 3px;font-size:11px}.tabs button b{display:block;font-size:20px;margin-bottom:2px}.tabs button.active{color:var(--green)}
-    .page{display:none}.page.active{display:block}.field{margin:12px 0}.field label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px}.field input,.field select{width:100%;padding:13px;background:#0d1923;border:1px solid var(--line);border-radius:12px;color:var(--text);outline:none}.field input:focus,.field select:focus{border-color:var(--green)}
-    .primary{width:100%;padding:14px;border:0;border-radius:13px;background:var(--green);color:#092218;font-weight:800;margin-top:8px}.secondary{padding:10px 13px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px}.danger{color:var(--red)}.filters{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.filters select{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px;min-width:0}
-    .goalinput{display:flex;gap:8px}.goalinput input{flex:1;min-width:0}.notice{background:#2b281b;border:1px solid #66572d;color:#f2d99a;border-radius:13px;padding:12px;font-size:12px;line-height:1.45;margin:14px 0}
-    dialog{width:min(92vw,480px);border:1px solid var(--line);border-radius:22px;background:#142331;color:var(--text);padding:20px;box-shadow:0 20px 80px #0009}dialog::backdrop{background:#0009}dialog h2{margin:0 0 12px}.modalactions{display:flex;gap:8px;margin-top:15px}.modalactions>*{flex:1}
-    @media(min-width:650px){.wrap{padding-top:26px}.hero{padding:25px}.summary{max-width:540px}.quick{max-width:540px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta name="description" content="Mio Bilancio: entrate, uscite e risparmi.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Mio Bilancio</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#151f30;--panel2:#1b2940;--text:#f4f7fb;--muted:#9eacc0;--line:#2b3a50;--green:#48d597;--red:#ff7884;--blue:#83b7ff;--yellow:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#101b2d,var(--bg) 55%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{padding:24px 18px 14px;max-width:850px;margin:auto}h1{font-size:27px;margin:0 0 4px;letter-spacing:-.5px}header p{margin:0;color:var(--muted)}
+main{max-width:850px;margin:auto;padding:0 14px 36px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 8px 24px #0002}
+h2{font-size:17px;margin:0 0 13px}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}
+.monthbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.monthbar select{flex:1;min-width:160px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.metric{background:var(--panel2);border-radius:13px;padding:12px;min-width:0}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:clamp(16px,4vw,21px);margin-top:5px;overflow-wrap:anywhere}.positive{color:var(--green)}.negative{color:var(--red)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}input,select,button{font:inherit}input,select{width:100%;background:#0e1828;border:1px solid var(--line);border-radius:11px;color:var(--text);padding:12px;min-height:45px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1}
+button{border:0;border-radius:11px;padding:12px 14px;background:#2b3e59;color:white;font-weight:650;cursor:pointer;min-height:44px}button.primary{background:#3979d9}button.income{background:#176e50}button.expense{background:#923b49}button.ghost{background:#263348}button:active{transform:scale(.99)}
+form .submit{width:100%;margin-top:14px}
+.list{display:flex;flex-direction:column;gap:8px}.item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#101a2a;border:1px solid var(--line);padding:11px;border-radius:12px}.item .desc{font-weight:600}.item .meta{font-size:12px;color:var(--muted);margin-top:3px}.amount{font-weight:750;white-space:nowrap}.actions{display:flex;gap:6px;align-items:center}.delete{background:#3a2630;color:#ffb3bb;padding:7px 9px;min-height:34px}
+.barrow{display:grid;grid-template-columns:82px 1fr 85px;gap:8px;align-items:center;margin:10px 0;font-size:12px}.track{height:10px;background:#29364a;border-radius:20px;overflow:hidden}.bar{height:100%;border-radius:20px;background:var(--blue)}.bar.in{background:var(--green)}.bar.out{background:var(--red)}
+.empty{padding:20px;text-align:center;color:var(--muted);background:#101a2a;border-radius:12px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}.tools button{flex:1}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+@media(max-width:520px){.cards{grid-template-columns:1fr 1fr}.cards .metric:last-child{grid-column:span 2}.grid2{grid-template-columns:1fr}.barrow{grid-template-columns:68px 1fr 78px}}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <header><div class="brand"><div class="logo">€</div><div><h1>Mio Bilancio</h1><small>Le tue finanze, sotto controllo</small></div></div><button class="iconbtn" id="backupBtn" aria-label="Backup">⇧</button></header>
-
-  <main>
-    <section id="home" class="page active">
-      <div class="hero">
-        <div class="eyebrow">Saldo disponibile</div><div class="balance" id="balance">0,00 €</div>
-        <div class="summary">
-          <div class="metric"><span>↗ Entrate del mese</span><strong class="positive" id="income">+0,00 €</strong></div>
-          <div class="metric"><span>↘ Uscite del mese</span><strong class="negative" id="expense">−0,00 €</strong></div>
-        </div>
-      </div>
-      <div class="quick"><button onclick="openForm('income')">＋ Aggiungi entrata</button><button onclick="openForm('expense')">－ Aggiungi uscita</button></div>
-      <div class="sectionhead"><h2>Obiettivo di risparmio</h2><button class="secondary small" onclick="showPage('goals')">Modifica</button></div>
-      <div class="card" id="goalCard"></div>
-      <div class="sectionhead"><h2>Ultimi movimenti</h2><button class="secondary small" onclick="showPage('moves')">Tutti</button></div>
-      <div class="card" id="recent"></div>
-      <div class="notice">I valori iniziali sono a zero. Inserisci i tuoi movimenti reali per ottenere un bilancio corretto. I dati restano salvati su questo dispositivo.</div>
-    </section>
-
-    <section id="moves" class="page">
-      <div class="sectionhead"><h2>Movimenti</h2><button class="secondary" onclick="openForm()">＋ Nuovo</button></div>
-      <div class="filters"><select id="filterType"><option value="all">Tutti</option><option value="income">Entrate</option><option value="expense">Uscite</option></select><select id="filterMonth"></select></div>
-      <div class="card" id="allMoves" style="margin-top:12px"></div>
-    </section>
-
-    <section id="stats" class="page">
-      <div class="sectionhead"><h2>Analisi del mese</h2><span class="muted small" id="statsMonth"></span></div>
-      <div class="card"><div class="row"><span class="muted">Differenza entrate − uscite</span><strong id="net">0,00 €</strong></div><div class="sectionhead"><h2 style="font-size:14px">Uscite per categoria</h2></div><div id="categoryBars"></div></div>
-      <div class="card"><h2 style="font-size:15px;margin:0 0 12px">Riepilogo</h2><div class="row"><span class="muted">Totale entrate</span><strong class="positive" id="statIn">0,00 €</strong></div><hr style="border-color:var(--line);border-width:1px 0 0;margin:13px 0"><div class="row"><span class="muted">Totale uscite</span><strong class="negative" id="statOut">0,00 €</strong></div></div>
-    </section>
-
-    <section id="goals" class="page">
-      <div class="sectionhead"><h2>Risparmio e budget</h2></div>
-      <div class="card"><h3 style="margin:0 0 5px">Il mio obiettivo</h3><p class="muted small">Imposta quanto vuoi riuscire a risparmiare ogni mese.</p><div class="field"><label>Obiettivo mensile (€)</label><input id="goalAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="es. 200"></div><button class="primary" id="saveGoal">Salva obiettivo</button><div id="goalProgress" style="margin-top:16px"></div></div>
-      <div class="card"><h3 style="margin:0 0 5px">Budget uscite mensili</h3><p class="muted small">Un limite generale per le spese del mese.</p><div class="field"><label>Budget mensile (€)</label><input id="budgetAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="es. 1200"></div><button class="primary" id="saveBudget">Salva budget</button><div id="budgetProgress" style="margin-top:16px"></div></div>
-    </section>
-
-    <section id="settings" class="page">
-      <div class="sectionhead"><h2>Impostazioni e dati</h2></div>
-      <div class="card"><h3 style="margin-top:0">Saldo iniziale</h3><p class="muted small">Inserisci quanto avevi sul conto/portafoglio all'inizio del monitoraggio. Non è un'entrata.</p><div class="field"><label>Saldo iniziale (€)</label><input id="openingBalance" type="number" step="0.01" inputmode="decimal"></div><button class="primary" id="saveOpening">Salva saldo iniziale</button></div>
-      <div class="card"><h3 style="margin-top:0">Backup dei dati</h3><p class="muted small">Esporta un file JSON per conservare una copia o trasferire i dati su un altro dispositivo.</p><button class="secondary" id="exportBtn">Esporta backup</button> <label class="secondary" style="display:inline-block;cursor:pointer">Importa backup<input id="importFile" type="file" accept="application/json,.json" hidden></label></div>
-      <div class="card"><h3 style="margin-top:0">Privacy</h3><p class="muted small">Questa versione salva i dati nel browser di questo dispositivo. Non inserire credenziali bancarie. Se cancelli i dati del browser senza backup, potresti perderli.</p><button class="secondary danger" id="clearBtn">Cancella tutti i dati</button></div>
-      <p class="muted small">Mio Bilancio · versione iniziale 1.0</p>
-    </section>
-  </main>
-</div>
-<nav class="tabs">
-  <button class="active" data-page="home"><b>⌂</b>Home</button><button data-page="moves"><b>⇄</b>Movimenti</button><button data-page="stats"><b>▥</b>Analisi</button><button data-page="goals"><b>◎</b>Risparmio</button><button data-page="settings"><b>⚙</b>Altro</button>
-</nav>
-
-<dialog id="txDialog">
-  <form id="txForm">
-    <h2 id="formTitle">Nuovo movimento</h2>
-    <input type="hidden" id="txId">
-    <div class="field"><label>Tipo</label><select id="txType"><option value="expense">Uscita</option><option value="income">Entrata</option></select></div>
-    <div class="field"><label>Importo (€)</label><input id="txAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="0,00"></div>
-    <div class="field"><label>Categoria</label><select id="txCategory"></select></div>
-    <div class="field"><label>Descrizione</label><input id="txNote" maxlength="70" placeholder="es. Spesa supermercato"></div>
-    <div class="field"><label>Data</label><input id="txDate" type="date" required></div>
-    <div class="modalactions"><button type="button" class="secondary" onclick="document.getElementById('txDialog').close()">Annulla</button><button class="primary" type="submit">Salva movimento</button></div>
-    <button type="button" id="deleteTx" class="secondary danger" style="width:100%;margin-top:9px;display:none">Elimina movimento</button>
-  </form>
-</dialog>
+<header><h1>💰 Mio Bilancio</h1><p>Le tue entrate, le tue uscite, i tuoi obiettivi.</p></header>
+<main>
+<section class="panel">
+ <div class="monthbar"><div style="flex:1"><h2 style="margin-bottom:4px">Riepilogo mensile</h2><div class="small">Da giugno a novembre 2026</div></div><select id="monthSelect" aria-label="Seleziona mese"></select></div>
+ <div class="cards" style="margin-top:14px">
+  <div class="metric"><span>Entrate</span><strong id="incomeTotal" class="positive">€ 0,00</strong></div>
+  <div class="metric"><span>Uscite</span><strong id="expenseTotal" class="negative">€ 0,00</strong></div>
+  <div class="metric"><span>Saldo del mese</span><strong id="balanceTotal">€ 0,00</strong></div>
+ </div>
+</section>
+<section class="panel">
+ <h2>➕ Aggiungi un movimento</h2>
+ <div class="tabs"><button id="incomeTab" class="income" type="button">Entrata</button><button id="expenseTab" class="ghost" type="button">Uscita</button></div>
+ <form id="transactionForm">
+  <div class="grid2"><div><label for="amount">Importo (€)</label><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Es. 35,50" required></div><div><label for="date">Data</label><input id="date" type="date" min="2026-06-01" max="2026-11-30" required></div></div>
+  <label for="description">Descrizione</label><input id="description" maxlength="70" placeholder="Es. stipendio, spesa, carburante" required>
+  <label for="category">Categoria</label><select id="category"></select>
+  <button class="primary submit" type="submit">Salva movimento</button>
+  <div class="small" style="margin-top:8px">Puoi inserire anche oggi movimenti passati, scegliendo la data corretta tra giugno e novembre 2026.</div>
+ </form>
+</section>
+<section class="panel">
+ <h2>📋 Movimenti del mese</h2><div id="transactionList" class="list"></div>
+</section>
+<section class="panel">
+ <h2>📊 Confronto degli ultimi sei mesi</h2>
+ <div class="small">Entrate e uscite registrate, da giugno a novembre 2026.</div>
+ <div id="monthChart" style="margin-top:14px"></div>
+</section>
+<section class="panel">
+ <h2>🏷️ Dove vanno i soldi</h2><div id="categoryChart"></div>
+</section>
+<section class="panel">
+ <h2>🎯 Obiettivo di risparmio</h2>
+ <label for="goal">Quanto vuoi risparmiare al mese? (€)</label><input id="goal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Es. 200">
+ <div id="goalStatus" class="small" style="margin-top:9px">Imposta un obiettivo per vedere i tuoi progressi.</div>
+</section>
+<section class="panel">
+ <h2>🔐 Backup dei dati</h2>
+ <p class="small">I movimenti restano salvati su questo dispositivo e in questo browser. Esporta periodicamente una copia per non perderli.</p>
+ <div class="tools"><button id="exportBtn" class="ghost" type="button">Esporta backup</button><button id="importBtn" class="ghost" type="button">Importa backup</button><input id="importFile" type="file" accept="application/json" hidden></div>
+</section>
+<footer class="small" style="text-align:center;padding:12px">Mio Bilancio · dati salvati sul tuo dispositivo</footer>
+</main>
 <script src="app.js"></script>
 </body></html>

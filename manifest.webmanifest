@@ -1,13 +1,10 @@
 {
   "name": "Mio Bilancio",
   "short_name": "Bilancio",
-  "description": "Gestisci entrate, uscite e risparmi.",
   "start_url": "./",
-  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0c141d",
-  "theme_color": "#101923",
+  "background_color": "#0b1220",
+  "theme_color": "#101827",
   "icons": [
     {
       "src": "icon-192.png",
